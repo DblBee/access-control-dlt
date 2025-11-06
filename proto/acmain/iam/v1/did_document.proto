@@ -1,0 +1,72 @@
+syntax = "proto3";
+package acmain.iam.v1;
+
+import "acmain/iam/v1/enums.proto";
+import "acmain/iam/v1/public_key_info.proto";
+import "acmain/iam/v1/service_endpoint.proto";
+import "acmain/iam/v1/verification_relationship.proto";
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "acmain/x/iam/types";
+
+// DIDDocument represents a W3C-compliant DID Document adapted for Cosmos
+// This is the canonical form stored on-chain
+message DIDDocument {
+  option (amino.name) = "acmain/x/iam/DIDDocument";
+
+  // id is the DID itself (e.g., "did:acmain:cosmos1abcdef...")
+  string id = 1;
+
+  // context defines the JSON-LD context (stored as strings for protobuf)
+  repeated string context = 2;
+
+  // controller is the address that can update this DID document
+  string controller = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // public_keys are all public keys associated with this DID
+  repeated PublicKeyInfo public_keys = 4 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // verification_relationships define how keys are used
+  repeated VerificationRelationship verification_relationships = 5 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // service_endpoints describe external services (e.g., website, API endpoints)
+  repeated ServiceEndpoint service_endpoints = 6 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // also_known_as provides alternative identifiers
+  repeated string also_known_as = 7;
+
+  // created_at is the block timestamp when the DID was created
+  google.protobuf.Timestamp created_at = 8 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // updated_at is the block timestamp of the last update
+  google.protobuf.Timestamp updated_at = 9 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // deactivated indicates if the DID is deactivated
+  bool deactivated = 10;
+
+  // deactivated_at is the block timestamp when the DID was deactivated
+  google.protobuf.Timestamp deactivated_at = 11 [(gogoproto.stdtime) = true];
+
+  // did_method specifies which DID method is used
+  DIDMethod did_method = 12;
+}

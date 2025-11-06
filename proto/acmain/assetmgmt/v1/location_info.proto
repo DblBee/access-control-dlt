@@ -1,0 +1,37 @@
+syntax = "proto3";
+package acmain.assetmgmt.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "acmain/x/assetmgmt/types";
+
+// LocationInfo encodes the physical location of an asset with building,
+// floor, and zone identifiers. This serves as the primary location binding
+// for location-based access control policies.
+message LocationInfo {
+  // adds the Equal function to this proto buff
+  // https://pkg.go.dev/github.com/gogo/protobuf/plugin/equal
+  option (gogoproto.equal) = true;
+
+  // building_id is the unique identifier for the building/facility.
+  // This is the primary location scope identifier.
+  string building_id = 1;
+
+  // floor_id is the unique identifier for the floor within the building.
+  string floor_id = 2;
+
+  // zone_id is the unique identifier for the zone/area on the floor.
+  string zone_id = 3;
+
+  // latitude_microdegrees is the latitude in microdegrees (degrees * 1e6)
+  // Range: -90000000 to 90000000 (~0.11 meter precision)
+  // Use fixed-point representation to ensure deterministic state across all nodes.
+  // To convert: degrees * 1000000 = microdegrees
+  int64 latitude_microdegrees = 4;
+
+  // longitude_microdegrees is the longitude in microdegrees (degrees * 1e6)
+  // Range: -180000000 to 180000000
+  // Use fixed-point representation to ensure deterministic state across all nodes.
+  // To convert: degrees * 1000000 = microdegrees
+  int64 longitude_microdegrees = 5;
+}

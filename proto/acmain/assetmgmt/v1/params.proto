@@ -1,0 +1,13 @@
+syntax = "proto3";
+package acmain.assetmgmt.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "acmain/x/assetmgmt/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "acmain/x/assetmgmt/Params";
+  option (gogoproto.equal) = true;
+}

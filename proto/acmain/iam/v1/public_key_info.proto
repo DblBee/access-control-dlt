@@ -1,0 +1,39 @@
+syntax = "proto3";
+package acmain.iam.v1;
+
+import "acmain/iam/v1/enums.proto";
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "acmain/x/iam/types";
+
+// PublicKeyInfo defines the PublicKeyInfo message.
+message PublicKeyInfo {
+  option (amino.name) = "acmain/x/iam/PublicKeyInfo";
+
+  // key_id is a unique identifier for the key within the DID document
+  string key_id = 1;
+
+  // public_key is the raw public key bytes
+  bytes public_key = 2;
+
+  // key_type specifies the cryptographic algorithm
+  KeyType key_type = 3;
+
+  // purpose describes the key's purpose (e.g., "authentication", "assertionMethod")
+  string purpose = 4;
+
+  // controller is the DID that controls this key (can differ from subject)
+  string controller = 5;
+
+  // created_at is the block timestamp when the key was added
+  google.protobuf.Timestamp created_at = 6 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // revoked_at is the block timestamp when the key was revoked (null if active)
+  google.protobuf.Timestamp revoked_at = 7 [(gogoproto.stdtime) = true];
+}

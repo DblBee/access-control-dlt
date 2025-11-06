@@ -1,0 +1,190 @@
+syntax = "proto3";
+package acmain.permission.v1;
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "acmain/x/permission/types";
+
+// Permission defines a bitwise permission set for DID-based access control
+message Permission {
+  // did is the subject DID that holds these permissions
+  string did = 1;
+
+  // resource_type defines what type of resource this permission applies to
+  // Examples: "asset", "did", "credential", "device", "zone"
+  string resource_type = 2;
+
+  // resource_id is the specific resource identifier (optional, empty means all resources of this type)
+  string resource_id = 3;
+
+  // permission_bits is the bitwise representation of granted permissions
+  // Uses uint64 to support up to 64 different permission types
+  uint64 permission_bits = 4;
+
+  // granted_by is the DID that granted these permissions
+  string granted_by = 5;
+
+  // granted_at is when the permission was granted
+  google.protobuf.Timestamp granted_at = 6 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+
+  // expires_at is when the permission expires (optional, zero time means no expiration)
+  google.protobuf.Timestamp expires_at = 7 [(gogoproto.stdtime) = true];
+
+  // revoked indicates if this permission has been revoked
+  bool revoked = 8;
+
+  // revoked_at is when the permission was revoked
+  google.protobuf.Timestamp revoked_at = 9 [(gogoproto.stdtime) = true];
+
+  // revoked_by is the DID that revoked this permission
+  string revoked_by = 10;
+
+  // conditions are optional conditions that must be met for permission to be valid
+  repeated PermissionCondition conditions = 11;
+
+  // metadata for additional context
+  map<string, string> metadata = 12;
+}
+
+// PermissionCondition defines a condition that must be met for permission to be valid
+message PermissionCondition {
+  ConditionType type = 1;
+
+  // condition_data contains the condition-specific data as JSON
+  string condition_data = 2;
+}
+
+// ConditionType defines the type of permission condition
+enum ConditionType {
+  CONDITION_TYPE_UNSPECIFIED = 0;
+  CONDITION_TYPE_TIME_WINDOW = 1; // Valid only during specific time windows
+  CONDITION_TYPE_LOCATION = 2; // Valid only in specific locations
+  CONDITION_TYPE_IP_RANGE = 3; // Valid only from specific IP ranges
+  CONDITION_TYPE_CREDENTIAL_TYPE = 4; // Requires specific credential type
+  CONDITION_TYPE_MFA = 5; // Requires multi-factor authentication
+  CONDITION_TYPE_DEVICE_TYPE = 6; // Valid only for specific device types
+}
+
+// PermissionBitDefinition defines the meaning of permission bits for a resource type
+message PermissionBitDefinition {
+  // resource_type is the type of resource this definition applies to
+  string resource_type = 1;
+
+  // bit_position is the bit position (0-63)
+  uint32 bit_position = 2;
+
+  // name is the human-readable name of this permission
+  string name = 3;
+
+  // description explains what this permission allows
+  string description = 4;
+
+  // created_at is when this definition was created
+  google.protobuf.Timestamp created_at = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+}
+
+// RolePermission defines a role with associated permission bits
+message RolePermission {
+  // role_name is the unique name of this role
+  string role_name = 1;
+
+  // resource_type defines what type of resource this role applies to
+  string resource_type = 2;
+
+  // permission_bits is the default permission set for this role
+  uint64 permission_bits = 3;
+
+  // description explains what this role provides
+  string description = 4;
+
+  // created_at is when this role was created
+  google.protobuf.Timestamp created_at = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+
+  // updated_at is when this role was last modified
+  google.protobuf.Timestamp updated_at = 6 [(gogoproto.stdtime) = true];
+
+  // created_by is the DID that created this role
+  string created_by = 7;
+}
+
+// DIDPermissionAssignment assigns permissions to a DID
+message DIDPermissionAssignment {
+  // did is the subject DID
+  string did = 1;
+
+  // permissions are the individual permission grants
+  repeated Permission permissions = 2;
+
+  // roles are role assignments for this DID
+  repeated string roles = 3;
+
+  // created_at is when this assignment was created
+  google.protobuf.Timestamp created_at = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+
+  // updated_at is when this assignment was last modified
+  google.protobuf.Timestamp updated_at = 5 [(gogoproto.stdtime) = true];
+}
+
+// PermissionAuditLog records permission-related actions for auditing
+message PermissionAuditLog {
+  // id is the unique audit log identifier
+  string id = 1;
+
+  // action describes what permission action occurred
+  PermissionAction action = 2;
+
+  // actor_did is the DID that performed the action
+  string actor_did = 3;
+
+  // subject_did is the DID affected by the action
+  string subject_did = 4;
+
+  // resource_type is the type of resource
+  string resource_type = 5;
+
+  // resource_id is the specific resource
+  string resource_id = 6;
+
+  // permission_bits shows the permission bits involved
+  uint64 permission_bits = 7;
+
+  // result indicates if the action succeeded
+  bool result = 8;
+
+  // reason provides additional context
+  string reason = 9;
+
+  // timestamp is when the action occurred
+  google.protobuf.Timestamp timestamp = 10 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+
+  // metadata for additional context
+  map<string, string> metadata = 11;
+}
+
+// PermissionAction defines types of permission-related actions
+enum PermissionAction {
+  PERMISSION_ACTION_UNSPECIFIED = 0;
+  PERMISSION_ACTION_GRANT = 1; // Permission granted
+  PERMISSION_ACTION_REVOKE = 2; // Permission revoked
+  PERMISSION_ACTION_CHECK = 3; // Permission checked
+  PERMISSION_ACTION_MODIFY = 4; // Permission modified
+  PERMISSION_ACTION_ROLE_ASSIGN = 5; // Role assigned
+  PERMISSION_ACTION_ROLE_REMOVE = 6; // Role removed
+}

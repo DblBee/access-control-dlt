@@ -1,0 +1,72 @@
+syntax = "proto3";
+package acmain.assetmgmt.v1;
+
+import "acmain/assetmgmt/v1/enums.proto";
+import "acmain/assetmgmt/v1/location_info.proto";
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "acmain/x/assetmgmt/types";
+
+// Asset defines the Asset message.
+message Asset {
+  // adds the Equal function to this proto buff
+  // https://pkg.go.dev/github.com/gogo/protobuf/plugin/equal
+  option (gogoproto.equal) = true;
+
+  // provides a standardized identifier for the message type
+  option (amino.name) = "acmain/x/assetmgmt/Asset";
+
+  // asset_id is the unique identifier for this asset within the system.
+  // Immutable after creation.
+  string asset_id = 1;
+
+  // asset_type specifies the type of physical asset (door, gate, barrier, etc).
+  AssetType asset_type = 2;
+
+  // name is a human-readable name for the asset.
+  string name = 3;
+
+  // description is an optional human-readable description of the asset.
+  string description = 4;
+
+  // location contains the immutable location binding for this asset.
+  // Assets are location-scoped: an asset from Building A cannot be used
+  // to grant access in Building B. This is enforced at network and app level.
+  LocationInfo location = 5 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // controller_address is the Cosmos address of the entity that controls
+  // this asset. Only the controller can update asset state and modify ACLs.
+  // Typically the organization/facility manager.
+  string controller_address = 6 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // state is the current operational state of the asset.
+  // Updated via MsgUpdateAssetState transactions.
+  AssetState state = 7;
+
+  // metadata is optional key-value data for asset-specific attributes.
+  // Examples: model_number, serial_number, manufacturer, firmware_version, etc.
+  // Maps are used to support arbitrary metadata without schema changes.
+  map<string, string> metadata = 8;
+
+  // created_at is the block timestamp when this asset was created.
+  // Immutable after creation.
+  google.protobuf.Timestamp created_at = 9 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true,
+    (amino.dont_omitempty) = true
+  ];
+
+  // updated_at is the block timestamp of the most recent state update.
+  // Updated whenever asset state changes or metadata is modified.
+  google.protobuf.Timestamp updated_at = 10 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true,
+    (amino.dont_omitempty) = true
+  ];
+}

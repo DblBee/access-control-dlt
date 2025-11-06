@@ -1,0 +1,323 @@
+syntax = "proto3";
+package acmain.iam.v1;
+
+import "acmain/iam/v1/device_key.proto";
+import "acmain/iam/v1/did_document.proto";
+import "acmain/iam/v1/enums.proto";
+import "acmain/iam/v1/params.proto";
+import "acmain/iam/v1/public_key_info.proto";
+import "acmain/iam/v1/verifiable_credential.proto";
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "acmain/x/iam/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/params";
+  }
+
+  // DID queries a DID document by its identifier
+  rpc DID(QueryDIDRequest) returns (QueryDIDResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/dids/{did}";
+  }
+
+  // DIDs queries all DID documents with optional filtering
+  rpc DIDs(QueryDIDsRequest) returns (QueryDIDsResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/dids";
+  }
+
+  // DIDs by controller queries all DIDs controlled by an address
+  rpc DIDsByController(QueryDIDsByControllerRequest) returns (QueryDIDsByControllerResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/dids-by-controller/{controller}";
+  }
+
+  // Credential queries a verifiable credential by its identifier
+  rpc Credential(QueryCredentialRequest) returns (QueryCredentialResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/credentials/{credential_id}";
+  }
+
+  // CredentialsBySubject queries all credentials for a given subject DID
+  rpc CredentialsBySubject(QueryCredentialsBySubjectRequest) returns (QueryCredentialsBySubjectResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/credentials-by-subject/{subject}";
+  }
+
+  // CredentialsByIssuer queries all credentials issued by a given address
+  rpc CredentialsByIssuer(QueryCredentialsByIssuerRequest) returns (QueryCredentialsByIssuerResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/credentials-by-issuer/{issuer}";
+  }
+
+  // IsCredentialValid checks if a credential is currently valid
+  rpc IsCredentialValid(QueryIsCredentialValidRequest) returns (QueryIsCredentialValidResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/credentials/{credential_id}/valid";
+  }
+
+  // DeviceKey queries a device's public key by device ID
+  rpc DeviceKey(QueryDeviceKeyRequest) returns (QueryDeviceKeyResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/device-keys/{device_id}";
+  }
+
+  // DeviceKeysByOwner queries all device keys owned by an address
+  rpc DeviceKeysByOwner(QueryDeviceKeysByOwnerRequest) returns (QueryDeviceKeysByOwnerResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/device-keys-by-owner/{owner}";
+  }
+
+  // DeviceKeysByLocation queries all device keys at a given location
+  rpc DeviceKeysByLocation(QueryDeviceKeysByLocationRequest) returns (QueryDeviceKeysByLocationResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/device-keys-by-location/{location}";
+  }
+
+  // PublicKey queries a specific public key from a DID document
+  rpc PublicKey(QueryPublicKeyRequest) returns (QueryPublicKeyResponse) {
+    option (google.api.http).get = "/dblbee/acmain/iam/v1/public-keys/{did}/{key_id}";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryDIDRequest is the request type for Query/DID RPC method
+message QueryDIDRequest {
+  // did is the Decentralized Identifier to query
+  string did = 1;
+}
+
+// QueryDIDResponse is the response type for Query/DID RPC method
+message QueryDIDResponse {
+  // did_document is the DID document
+  DIDDocument did_document = 1;
+}
+
+// QueryDIDsRequest is the request type for Query/DIDs RPC method
+message QueryDIDsRequest {
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+
+  // did_method filters results by DID method (optional)
+  DIDMethod did_method = 2;
+
+  // deactivated_only filters to show only deactivated DIDs (optional)
+  bool deactivated_only = 3;
+}
+
+// QueryDIDsResponse is the response type for Query/DIDs RPC method
+message QueryDIDsResponse {
+  // did_documents are the DID documents
+  repeated DIDDocument did_documents = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // pagination defines the pagination response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryDIDsByControllerRequest is the request type for Query/DIDsByController RPC method
+message QueryDIDsByControllerRequest {
+  // controller is the Cosmos address that controls the DIDs
+  string controller = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryDIDsByControllerResponse is the response type for Query/DIDsByController RPC method
+message QueryDIDsByControllerResponse {
+  // did_documents are the DID documents
+  repeated DIDDocument did_documents = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // pagination defines the pagination response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryCredentialRequest is the request type for Query/Credential RPC method
+message QueryCredentialRequest {
+  // credential_id is the unique identifier of the credential
+  string credential_id = 1;
+}
+
+// QueryCredentialResponse is the response type for Query/Credential RPC method
+message QueryCredentialResponse {
+  // verifiable_credential is the credential data
+  VerifiableCredential verifiable_credential = 1;
+}
+
+// QueryCredentialsBySubjectRequest is the request type for Query/CredentialsBySubject RPC method
+message QueryCredentialsBySubjectRequest {
+  // subject is the DID of the credential subject
+  string subject = 1;
+
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+
+  // credential_type filters by credential type (optional)
+  CredentialType credential_type = 3;
+
+  // include_expired includes expired credentials (default: false)
+  bool include_expired = 4;
+}
+
+// QueryCredentialsBySubjectResponse is the response type for Query/CredentialsBySubject RPC method
+message QueryCredentialsBySubjectResponse {
+  // verifiable_credentials are the subject's credentials
+  repeated VerifiableCredential verifiable_credentials = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // pagination defines the pagination response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryCredentialsByIssuerRequest is the request type for Query/CredentialsByIssuer RPC method
+message QueryCredentialsByIssuerRequest {
+  // issuer is the Cosmos address of the credential issuer
+  string issuer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+
+  // credential_type filters by credential type (optional)
+  CredentialType credential_type = 3;
+}
+
+// QueryCredentialsByIssuerResponse is the response type for Query/CredentialsByIssuer RPC method
+message QueryCredentialsByIssuerResponse {
+  // verifiable_credentials are the credentials issued
+  repeated VerifiableCredential verifiable_credentials = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // pagination defines the pagination response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+
+  // total_issued is the total number of credentials issued by this issuer
+  uint64 total_issued = 3;
+}
+
+// QueryIsCredentialValidRequest is the request type for Query/IsCredentialValid RPC method
+message QueryIsCredentialValidRequest {
+  // credential_id is the unique identifier of the credential
+  string credential_id = 1;
+
+  // at_timestamp checks validity at a specific time (optional, defaults to current block time)
+  google.protobuf.Timestamp at_timestamp = 2 [(gogoproto.stdtime) = true];
+}
+
+// QueryIsCredentialValidResponse is the response type for Query/IsCredentialValid RPC method
+message QueryIsCredentialValidResponse {
+  // valid indicates if the credential is valid
+  bool valid = 1;
+
+  // reason explains why the credential is invalid (empty if valid)
+  string reason = 2;
+
+  // status is the current credential status
+  CredentialStatus status = 3;
+
+  // expires_at is the expiration time (null if already expired)
+  google.protobuf.Timestamp expires_at = 4 [(gogoproto.stdtime) = true];
+}
+
+// QueryDeviceKeyRequest is the request type for Query/DeviceKey RPC method
+message QueryDeviceKeyRequest {
+  // device_id is the unique identifier of the IoT device
+  string device_id = 1;
+}
+
+// QueryDeviceKeyResponse is the response type for Query/DeviceKey RPC method
+message QueryDeviceKeyResponse {
+  // device_key is the device's key information
+  DeviceKey device_key = 1;
+}
+
+// QueryDeviceKeysByOwnerRequest is the request type for Query/DeviceKeysByOwner RPC method
+message QueryDeviceKeysByOwnerRequest {
+  // owner is the Cosmos address that owns the devices
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+
+  // device_type filters by device type (optional, e.g., "smart_lock", "sensor")
+  string device_type = 3;
+
+  // include_inactive includes inactive/revoked device keys (default: false)
+  bool include_inactive = 4;
+}
+
+// QueryDeviceKeysByOwnerResponse is the response type for Query/DeviceKeysByOwner RPC method
+message QueryDeviceKeysByOwnerResponse {
+  // device_keys are the owner's device keys
+  repeated DeviceKey device_keys = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // pagination defines the pagination response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryDeviceKeysByLocationRequest is the request type for Query/DeviceKeysByLocation RPC method
+message QueryDeviceKeysByLocationRequest {
+  // location is the physical location to query (e.g., "building-a:floor-2:zone-1")
+  string location = 1;
+
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+
+  // device_type filters by device type (optional)
+  string device_type = 3;
+
+  // include_inactive includes inactive/revoked device keys (default: false)
+  bool include_inactive = 4;
+}
+
+// QueryDeviceKeysByLocationResponse is the response type for Query/DeviceKeysByLocation RPC method
+message QueryDeviceKeysByLocationResponse {
+  // device_keys are the devices at the location
+  repeated DeviceKey device_keys = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // pagination defines the pagination response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+
+  // total_count is the total number of devices at this location
+  uint64 total_count = 3;
+}
+
+// QueryPublicKeyRequest is the request type for Query/PublicKey RPC method
+message QueryPublicKeyRequest {
+  // did is the Decentralized Identifier
+  string did = 1;
+
+  // key_id is the identifier of the key within the DID document
+  string key_id = 2;
+}
+
+// QueryPublicKeyResponse is the response type for Query/PublicKey RPC method
+message QueryPublicKeyResponse {
+  // public_key_info is the public key information
+  PublicKeyInfo public_key_info = 1;
+}

@@ -1,0 +1,28 @@
+syntax = "proto3";
+package acmain.iam.v1;
+
+import "acmain/iam/v1/enums.proto";
+import "acmain/iam/v1/public_key_info.proto";
+import "acmain/iam/v1/verification_relationship.proto";
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "acmain/x/iam/types";
+
+// ServiceEndpoint represents a service endpoint in the DID document
+message ServiceEndpoint {
+  option (amino.name) = "acmain/x/iam/ServiceEndpoint";
+
+  // id is the unique identifier for the service endpoint
+  string id = 1;
+
+  // type describes the service type (e.g., "VerifiableCredentialService", "WebAPI")
+  string type = 2;
+
+  // service_endpoint is the URL or endpoint address
+  string service_endpoint = 3;
+
+  // description provides additional context
+  string description = 4;
+}

@@ -1,0 +1,386 @@
+syntax = "proto3";
+package acmain.iam.v1;
+
+import "acmain/iam/v1/device_key.proto";
+import "acmain/iam/v1/did_document.proto";
+import "acmain/iam/v1/enums.proto";
+import "acmain/iam/v1/params.proto";
+import "acmain/iam/v1/public_key_info.proto";
+import "acmain/iam/v1/service_endpoint.proto";
+import "acmain/iam/v1/verifiable_credential.proto";
+import "acmain/iam/v1/verification_relationship.proto";
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "acmain/x/iam/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // UpdateParams defines a (governance) operation for updating the module
+  // parameters. The authority defaults to the x/gov module account.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // RegisterDID registers a new Decentralized Identifier (DID) with its document
+  rpc RegisterDID(MsgRegisterDID) returns (MsgRegisterDIDResponse);
+
+  // UpdateDIDDocument updates an existing DID document
+  rpc UpdateDIDDocument(MsgUpdateDIDDocument) returns (MsgUpdateDIDDocumentResponse);
+
+  // DeactivateDID deactivates a DID, preventing further updates
+  rpc DeactivateDID(MsgDeactivateDID) returns (MsgDeactivateDIDResponse);
+
+  // AddPublicKey adds a new public key to a DID document
+  rpc AddPublicKey(MsgAddPublicKey) returns (MsgAddPublicKeyResponse);
+
+  // RevokePublicKey revokes a public key from a DID document
+  rpc RevokePublicKey(MsgRevokePublicKey) returns (MsgRevokePublicKeyResponse);
+
+  // IssueCredential issues a new Verifiable Credential
+  rpc IssueCredential(MsgIssueCredential) returns (MsgIssueCredentialResponse);
+
+  // RevokeCredential revokes a previously issued Verifiable Credential
+  rpc RevokeCredential(MsgRevokeCredential) returns (MsgRevokeCredentialResponse);
+
+  // SuspendCredential suspends a Verifiable Credential (temporary revocation)
+  rpc SuspendCredential(MsgSuspendCredential) returns (MsgSuspendCredentialResponse);
+
+  // ResumeCredential resumes a previously suspended Verifiable Credential
+  rpc ResumeCredential(MsgResumeCredential) returns (MsgResumeCredentialResponse);
+
+  // RegisterDeviceKey registers a device's public key for IoT authentication
+  rpc RegisterDeviceKey(MsgRegisterDeviceKey) returns (MsgRegisterDeviceKeyResponse);
+
+  // RevokeDeviceKey revokes a device's public key
+  rpc RevokeDeviceKey(MsgRevokeDeviceKey) returns (MsgRevokeDeviceKeyResponse);
+
+  // RotateDeviceKey rotates a device's public key
+  rpc RotateDeviceKey(MsgRotateDeviceKey) returns (MsgRotateDeviceKeyResponse);
+}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "acmain/x/iam/MsgUpdateParams";
+
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the module parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+
+// MsgRegisterDID registers a new Decentralized Identifier with a DID document
+message MsgRegisterDID {
+  option (cosmos.msg.v1.signer) = "controller";
+  option (amino.name) = "acmain/x/iam/MsgRegisterDID";
+
+  // controller is the Cosmos address that will control this DID
+  string controller = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // did is the full DID string (e.g., "did:acmain:cosmos1abcdef...")
+  string did = 2;
+
+  // did_method specifies which DID method is being used
+  DIDMethod did_method = 3;
+
+  // public_key is the initial public key for this DID
+  bytes public_key = 4;
+
+  // key_type is the cryptographic algorithm
+  KeyType key_type = 5;
+
+  // service_endpoints optional service endpoints (e.g., API, website)
+  repeated ServiceEndpoint service_endpoints = 6 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // also_known_as optional alternative identifiers
+  repeated string also_known_as = 7;
+
+  // metadata stores additional attributes (e.g., "device_type": "smart_lock")
+  map<string, string> metadata = 8;
+}
+
+// MsgRegisterDIDResponse defines the response for RegisterDID
+message MsgRegisterDIDResponse {
+  // did_document is the created DID document
+  DIDDocument did_document = 1;
+}
+
+// MsgUpdateDIDDocument updates an existing DID document
+message MsgUpdateDIDDocument {
+  option (cosmos.msg.v1.signer) = "controller";
+  option (amino.name) = "acmain/x/iam/MsgUpdateDIDDocument";
+
+  // controller is the address authorized to update the DID
+  string controller = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // did is the DID to update
+  string did = 2;
+
+  // service_endpoints replaces existing service endpoints
+  repeated ServiceEndpoint service_endpoints = 3 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // also_known_as replaces existing alternative identifiers
+  repeated string also_known_as = 4;
+
+  // metadata updates (merged with existing)
+  map<string, string> metadata = 5;
+}
+
+// MsgUpdateDIDDocumentResponse defines the response for UpdateDIDDocument
+message MsgUpdateDIDDocumentResponse {
+  // did_document is the updated DID document
+  DIDDocument did_document = 1;
+}
+
+// MsgDeactivateDID deactivates a DID, preventing further modifications
+message MsgDeactivateDID {
+  option (cosmos.msg.v1.signer) = "controller";
+  option (amino.name) = "acmain/x/iam/MsgDeactivateDID";
+
+  // controller is the address authorized to deactivate the DID
+  string controller = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // did is the DID to deactivate
+  string did = 2;
+}
+
+// MsgDeactivateDIDResponse defines the response for DeactivateDID
+message MsgDeactivateDIDResponse {}
+
+// MsgAddPublicKey adds a new public key to a DID document
+message MsgAddPublicKey {
+  option (cosmos.msg.v1.signer) = "controller";
+  option (amino.name) = "acmain/x/iam/MsgAddPublicKey";
+
+  // controller is the address authorized to add keys
+  string controller = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // did is the DID to which the key is added
+  string did = 2;
+
+  // key_id is the unique identifier for this key within the DID
+  string key_id = 3;
+
+  // public_key is the key material
+  bytes public_key = 4;
+
+  // key_type is the cryptographic algorithm
+  KeyType key_type = 5;
+
+  // purpose describes the key's intended purpose (e.g., "authentication", "assertionMethod")
+  string purpose = 6;
+}
+
+// MsgAddPublicKeyResponse defines the response for AddPublicKey
+message MsgAddPublicKeyResponse {
+  // public_key_info is the added key information
+  PublicKeyInfo public_key_info = 1;
+}
+
+// MsgRevokePublicKey revokes a public key from a DID document
+message MsgRevokePublicKey {
+  option (cosmos.msg.v1.signer) = "controller";
+  option (amino.name) = "acmain/x/iam/MsgRevokePublicKey";
+
+  // controller is the address authorized to revoke keys
+  string controller = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // did is the DID from which the key is revoked
+  string did = 2;
+
+  // key_id is the identifier of the key to revoke
+  string key_id = 3;
+}
+
+// MsgRevokePublicKeyResponse defines the response for RevokePublicKey
+message MsgRevokePublicKeyResponse {}
+
+// MsgIssueCredential issues a new Verifiable Credential
+message MsgIssueCredential {
+  option (cosmos.msg.v1.signer) = "issuer";
+  option (amino.name) = "acmain/x/iam/MsgIssueCredential";
+
+  // issuer is the Cosmos address issuing the credential
+  string issuer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // subject is the DID of the credential subject
+  string subject = 2;
+
+  // credential_type is the semantic type of the credential
+  CredentialType credential_type = 3;
+
+  // claims are the credential attributes (key-value pairs)
+  // e.g., "role": "engineer", "department": "platform", "clearance": "level-2"
+  map<string, string> claims = 4;
+
+  // valid_from is the earliest time the credential is valid (optional)
+  google.protobuf.Timestamp valid_from = 5 [(gogoproto.stdtime) = true];
+
+  // valid_until is the expiration time of the credential
+  google.protobuf.Timestamp valid_until = 6 [(gogoproto.stdtime) = true];
+
+  // metadata stores issuer-specific attributes
+  map<string, string> metadata = 7;
+
+  // refresh_service optional service endpoint for credential renewal
+  string refresh_service = 8;
+
+  // signature is the issuer's signature over the canonical credential data
+  // This proves the issuer authorized the credential issuance
+  bytes signature = 9;
+}
+
+// MsgIssueCredentialResponse defines the response for IssueCredential
+message MsgIssueCredentialResponse {
+  // credential_id is the unique identifier of the issued credential
+  string credential_id = 1;
+
+  // verifiable_credential is the complete credential
+  VerifiableCredential verifiable_credential = 2;
+}
+
+// MsgRevokeCredential revokes a previously issued Verifiable Credential
+message MsgRevokeCredential {
+  option (cosmos.msg.v1.signer) = "issuer";
+  option (amino.name) = "acmain/x/iam/MsgRevokeCredential";
+
+  // issuer is the address that issued the credential (must match original issuer)
+  string issuer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // credential_id is the unique identifier of the credential to revoke
+  string credential_id = 2;
+
+  // revocation_reason describes why the credential was revoked
+  string revocation_reason = 3;
+}
+
+// MsgRevokeCredentialResponse defines the response for RevokeCredential
+message MsgRevokeCredentialResponse {}
+
+// MsgSuspendCredential temporarily suspends a Verifiable Credential
+message MsgSuspendCredential {
+  option (cosmos.msg.v1.signer) = "issuer";
+  option (amino.name) = "acmain/x/iam/MsgSuspendCredential";
+
+  // issuer is the address that issued the credential
+  string issuer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // credential_id is the unique identifier of the credential to suspend
+  string credential_id = 2;
+
+  // suspension_reason describes why the credential is suspended
+  string suspension_reason = 3;
+}
+
+// MsgSuspendCredentialResponse defines the response for SuspendCredential
+message MsgSuspendCredentialResponse {}
+
+// MsgResumeCredential resumes a previously suspended Verifiable Credential
+message MsgResumeCredential {
+  option (cosmos.msg.v1.signer) = "issuer";
+  option (amino.name) = "acmain/x/iam/MsgResumeCredential";
+
+  // issuer is the address that issued the credential
+  string issuer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // credential_id is the unique identifier of the credential to resume
+  string credential_id = 2;
+}
+
+// MsgResumeCredentialResponse defines the response for ResumeCredential
+message MsgResumeCredentialResponse {}
+
+// MsgRegisterDeviceKey registers an IoT device's public key
+message MsgRegisterDeviceKey {
+  option (cosmos.msg.v1.signer) = "owner";
+  option (amino.name) = "acmain/x/iam/MsgRegisterDeviceKey";
+
+  // owner is the Cosmos address that owns/registers the device
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // device_id is the unique identifier for the IoT device
+  string device_id = 2;
+
+  // public_key is the device's public key
+  bytes public_key = 3;
+
+  // key_type is the cryptographic algorithm
+  KeyType key_type = 4;
+
+  // device_type describes the device category (e.g., "smart_lock", "sensor", "witness_node")
+  string device_type = 5;
+
+  // location is where the device is physically located (e.g., building_id, floor, zone)
+  string location = 6;
+
+  // metadata stores device-specific attributes
+  map<string, string> metadata = 7;
+}
+
+// MsgRegisterDeviceKeyResponse defines the response for RegisterDeviceKey
+message MsgRegisterDeviceKeyResponse {
+  // device_key is the registered device key information
+  DeviceKey device_key = 1;
+}
+
+// MsgRevokeDeviceKey revokes a device's public key
+message MsgRevokeDeviceKey {
+  option (cosmos.msg.v1.signer) = "owner";
+  option (amino.name) = "acmain/x/iam/MsgRevokeDeviceKey";
+
+  // owner is the address that owns the device
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // device_id is the unique identifier of the device
+  string device_id = 2;
+
+  // revocation_reason describes why the key is revoked
+  string revocation_reason = 3;
+}
+
+// MsgRevokeDeviceKeyResponse defines the response for RevokeDeviceKey
+message MsgRevokeDeviceKeyResponse {}
+
+// MsgRotateDeviceKey rotates a device's public key
+message MsgRotateDeviceKey {
+  option (cosmos.msg.v1.signer) = "owner";
+  option (amino.name) = "acmain/x/iam/MsgRotateDeviceKey";
+
+  // owner is the address that owns the device
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // device_id is the unique identifier of the device
+  string device_id = 2;
+
+  // new_public_key is the replacement public key
+  bytes new_public_key = 3;
+
+  // key_type is the cryptographic algorithm
+  KeyType key_type = 4;
+}
+
+// MsgRotateDeviceKeyResponse defines the response for RotateDeviceKey
+message MsgRotateDeviceKeyResponse {
+  // device_key is the updated device key information
+  DeviceKey device_key = 1;
+}

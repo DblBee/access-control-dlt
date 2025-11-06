@@ -1,0 +1,17 @@
+syntax = "proto3";
+package acmain.iam.v1;
+
+import "amino/amino.proto";
+
+option go_package = "acmain/x/iam/types";
+
+// VerificationRelationship represents a verification relationship in DID document
+message VerificationRelationship {
+  option (amino.name) = "acmain/x/iam/VerificationRelationship";
+
+  // relationship_type describes the relationship (e.g., "authentication", "assertionMethod", "keyAgreement")
+  string relationship_type = 1;
+
+  // key_id references a key in the DID document
+  string key_id = 2;
+}

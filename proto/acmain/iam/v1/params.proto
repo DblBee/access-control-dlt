@@ -1,0 +1,13 @@
+syntax = "proto3";
+package acmain.iam.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "acmain/x/iam/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "acmain/x/iam/Params";
+  option (gogoproto.equal) = true;
+}

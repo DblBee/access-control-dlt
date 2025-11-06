@@ -1,0 +1,46 @@
+syntax = "proto3";
+package acmain.assetmgmt.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "acmain/x/assetmgmt/types";
+
+// AssetType defines the enum of supported physical asset types.
+enum AssetType {
+  // does not set the enum prefix in generated code
+  option (gogoproto.goproto_enum_prefix) = false;
+  // ASSET_TYPE_UNSPECIFIED represents an unspecified asset type
+  ASSET_TYPE_UNSPECIFIED = 0;
+  // ASSET_TYPE_DOOR represents a physical door asset
+  ASSET_TYPE_DOOR = 1;
+  // ASSET_TYPE_GATE represents a physical gate asset
+  ASSET_TYPE_GATE = 2;
+  // ASSET_TYPE_BARRIER represents a physical barrier asset
+  ASSET_TYPE_BARRIER = 3;
+  // ASSET_TYPE_ELEVATOR represents an elevator asset
+  ASSET_TYPE_ELEVATOR = 4;
+  // ASSET_TYPE_TURNSTILE represents a turnstile asset
+  ASSET_TYPE_TURNSTILE = 5;
+}
+
+// AssetState defines the enum of supported asset operational states.
+enum AssetState {
+  // does not set the enum prefix in generated code
+  option (gogoproto.goproto_enum_prefix) = false;
+  // ASSET_STATE_UNSPECIFIED represents an unspecified state
+  ASSET_STATE_UNSPECIFIED = 0;
+  // ASSET_STATE_LOCKED represents a locked asset
+  ASSET_STATE_LOCKED = 1;
+  // ASSET_STATE_UNLOCKED represents an unlocked asset
+  ASSET_STATE_UNLOCKED = 2;
+  // ASSET_STATE_OPEN represents an open asset
+  ASSET_STATE_OPEN = 3;
+  // ASSET_STATE_CLOSED represents a closed asset
+  ASSET_STATE_CLOSED = 4;
+  // ASSET_STATE_MAINTENANCE represents an asset in maintenance
+  ASSET_STATE_MAINTENANCE = 5;
+  // ASSET_STATE_OFFLINE represents an offline asset
+  ASSET_STATE_OFFLINE = 6;
+  // ASSET_STATE_DEACTIVATED represents a deactivated asset
+  ASSET_STATE_DEACTIVATED = 7;
+}

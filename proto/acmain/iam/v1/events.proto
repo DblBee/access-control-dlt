@@ -1,0 +1,125 @@
+syntax = "proto3";
+package acmain.iam.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "acmain/x/iam/types";
+
+// EventCredentialResumed is emitted when a suspended credential is resumed
+message EventCredentialResumed {
+  option (amino.name) = "acmain/iam/EventCredentialResumed";
+  option (gogoproto.equal) = true;
+
+  // credential_id is the unique identifier of the resumed credential
+  string credential_id = 1;
+
+  // issuer is the address that resumed the credential
+  string issuer = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// EventCredentialRevoked is emitted when a credential is revoked
+message EventCredentialRevoked {
+  option (amino.name) = "acmain/iam/EventCredentialRevoked";
+  option (gogoproto.equal) = true;
+
+  // credential_id is the unique identifier of the revoked credential
+  string credential_id = 1;
+
+  // issuer is the address that issued and revoked the credential
+  string issuer = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // reason describes why the credential was revoked
+  string reason = 3;
+}
+
+// EventCredentialSuspended is emitted when a credential is suspended
+message EventCredentialSuspended {
+  option (amino.name) = "acmain/iam/EventCredentialSuspended";
+  option (gogoproto.equal) = true;
+
+  // credential_id is the unique identifier of the suspended credential
+  string credential_id = 1;
+
+  // issuer is the address that suspended the credential
+  string issuer = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // reason describes why the credential was suspended
+  string reason = 3;
+}
+
+// EventDeviceKeyRegistered is emitted when a device key is registered
+message EventDeviceKeyRegistered {
+  option (amino.name) = "acmain/iam/EventDeviceKeyRegistered";
+  option (gogoproto.equal) = true;
+
+  // device_id is the unique identifier of the registered device
+  string device_id = 1;
+
+  // owner is the address that owns this device
+  string owner = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // location is where the device is physically located
+  string location = 3;
+}
+
+// EventDeviceKeyRevoked is emitted when a device key is revoked
+message EventDeviceKeyRevoked {
+  option (amino.name) = "acmain/iam/EventDeviceKeyRevoked";
+  option (gogoproto.equal) = true;
+
+  // device_id is the unique identifier of the device
+  string device_id = 1;
+
+  // owner is the address that owns this device
+  string owner = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // reason describes why the key was revoked
+  string reason = 3;
+}
+
+// EventDeviceKeyRotated is emitted when a device key is rotated
+message EventDeviceKeyRotated {
+  option (amino.name) = "acmain/iam/EventDeviceKeyRotated";
+  option (gogoproto.equal) = true;
+
+  // device_id is the unique identifier of the device
+  string device_id = 1;
+
+  // owner is the address that owns this device
+  string owner = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// EventDIDRegistered is emitted when a new DID is registered
+message EventDIDRegistered {
+  option (amino.name) = "acmain/iam/EventDIDRegistered";
+  option (gogoproto.equal) = true;
+
+  // did is the identifier of the registered DID
+  string did = 1;
+
+  // controller is the address that controls this DID
+  string controller = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// EventDIDUpdated is emitted when a DID document is updated
+message EventDIDUpdated {
+  option (amino.name) = "acmain/iam/EventDIDUpdated";
+  option (gogoproto.equal) = true;
+
+  // did is the identifier of the updated DID
+  string did = 1;
+}
+
+// EventPublicKeyRevoked is emitted when a public key is revoked
+message EventPublicKeyRevoked {
+  option (amino.name) = "acmain/iam/EventPublicKeyRevoked";
+  option (gogoproto.equal) = true;
+
+  // did is the identifier of the DID whose key was revoked
+  string did = 1;
+
+  // key_id is the identifier of the revoked key
+  string key_id = 2;
+}

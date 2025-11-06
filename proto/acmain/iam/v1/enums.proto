@@ -1,0 +1,56 @@
+syntax = "proto3";
+package acmain.iam.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "acmain/x/iam/types";
+
+// CredentialType defines the type of verifiable credential
+enum CredentialType {
+  // does not set the enum prefix in generated code
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  CREDENTIAL_TYPE_UNSPECIFIED = 0;
+  CREDENTIAL_TYPE_EMPLOYEE = 1;
+  CREDENTIAL_TYPE_CONTRACTOR = 2;
+  CREDENTIAL_TYPE_VISITOR = 3;
+  CREDENTIAL_TYPE_DEVICE = 4;
+  CREDENTIAL_TYPE_ADMIN = 5;
+  CREDENTIAL_TYPE_SECURITY_OFFICER = 6;
+  CREDENTIAL_TYPE_EMERGENCY_RESPONDER = 7;
+}
+
+// CredentialStatus defines the status of a verifiable credential
+enum CredentialStatus {
+  // does not set the enum prefix in generated code
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  CREDENTIAL_STATUS_UNSPECIFIED = 0;
+  CREDENTIAL_STATUS_ACTIVE = 1;
+  CREDENTIAL_STATUS_REVOKED = 2;
+  CREDENTIAL_STATUS_EXPIRED = 3;
+  CREDENTIAL_STATUS_SUSPENDED = 4;
+}
+
+// KeyType defines the cryptographic key type
+enum KeyType {
+  // does not set the enum prefix in generated code
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  KEY_TYPE_UNSPECIFIED = 0;
+  KEY_TYPE_ED25519 = 1;
+  KEY_TYPE_SECP256K1 = 2;
+  KEY_TYPE_RSA = 3;
+  KEY_TYPE_ECDSA = 4;
+}
+
+// DIDMethod defines the DID method type
+enum DIDMethod {
+  // does not set the enum prefix in generated code
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  DID_METHOD_UNSPECIFIED = 0;
+  DID_METHOD_acmain = 1; // acmain: method - primary method for this system
+  DID_METHOD_KEY = 2; // did:key: method - lightweight, no registry required
+  DID_METHOD_WEB = 3; // did:web: method - web-based DID resolution
+}

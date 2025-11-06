@@ -1,0 +1,160 @@
+syntax = "proto3";
+
+package acmain.assetmgmt.v1;
+
+import "acmain/assetmgmt/v1/asset.proto";
+import "acmain/assetmgmt/v1/enums.proto";
+import "acmain/assetmgmt/v1/location_info.proto";
+import "acmain/assetmgmt/v1/params.proto";
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+
+option go_package = "acmain/x/assetmgmt/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/acmain/assetmgmt/v1/params";
+  }
+
+  // Asset Queries a list of Asset items.
+  rpc Asset(QueryAssetRequest) returns (QueryAssetResponse) {
+    option (google.api.http).get = "/acmain/assetmgmt/v1/asset/{asset_id}";
+  }
+
+  // AssetsByLocation Queries a list of AssetsByLocation items.
+  rpc AssetsByLocation(QueryAssetsByLocationRequest) returns (QueryAssetsByLocationResponse) {
+    option (google.api.http).get = "/acmain/assetmgmt/v1/assets_by_location/{building_id}/{floor_id}/{zone_id}";
+  }
+
+  // AssetsByType Queries a list of AssetsByType items.
+  rpc AssetsByType(QueryAssetsByTypeRequest) returns (QueryAssetsByTypeResponse) {
+    option (google.api.http).get = "/acmain/assetmgmt/v1/assets_by_type/{asset_type}/{building_id}";
+  }
+
+  // AssetsByController Queries a list of AssetsByController items.
+  rpc AssetsByController(QueryAssetsByControllerRequest) returns (QueryAssetsByControllerResponse) {
+    option (google.api.http).get = "/acmain/assetmgmt/v1/assets_by_controller/{controller_address}/{building_id}";
+  }
+
+  // AssetsByState Queries a list of AssetsByState items.
+  rpc AssetsByState(QueryAssetsByStateRequest) returns (QueryAssetsByStateResponse) {
+    option (google.api.http).get = "/acmain/assetmgmt/v1/assets_by_state/{state}/{building_id}";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryAssetRequest defines the QueryAssetRequest message.
+message QueryAssetRequest {
+  string asset_id = 1;
+}
+
+// QueryAssetResponse defines the QueryAssetResponse message.
+message QueryAssetResponse {
+  // asset is the queried asset.
+  Asset asset = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// QueryAssetsByLocationRequest defines the QueryAssetsByLocationRequest message.
+message QueryAssetsByLocationRequest {
+  string building_id = 1;
+  string floor_id = 2;
+  string zone_id = 3;
+  cosmos.base.query.v1beta1.PageRequest pagination = 4;
+}
+
+// QueryAssetsByLocationResponse defines the QueryAssetsByLocationResponse message.
+message QueryAssetsByLocationResponse {
+  // assets is the list of assets in the specified location.
+  repeated Asset assets = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // pagination defines the pagination response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryAssetsByTypeRequest defines the QueryAssetsByTypeRequest message.
+message QueryAssetsByTypeRequest {
+  string asset_type = 1;
+  string building_id = 2;
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryAssetsByTypeResponse defines the QueryAssetsByTypeResponse message.
+message QueryAssetsByTypeResponse {
+  // assets is the list of assets of the specified type.
+  repeated Asset assets = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // pagination defines the pagination response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryAssetsByControllerRequest defines the QueryAssetsByControllerRequest message.
+message QueryAssetsByControllerRequest {
+  string controller_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string building_id = 2;
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryAssetsByControllerResponse defines the QueryAssetsByControllerResponse message.
+// QueryAssetsByControllerResponse is the response type for Query/AssetsByController RPC method.
+message QueryAssetsByControllerResponse {
+  // assets is the list of assets controlled by the specified address.
+  repeated Asset assets = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // pagination defines the pagination response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryAssetsByStateRequest is the request type for Query/AssetsByState RPC method.
+// Queries assets filtered by operational state (locked, unlocked, maintenance, etc).
+// Supports pagination via page and limit parameters.
+message QueryAssetsByStateRequest {
+  // state is the operational state to filter by.
+  AssetState state = 1;
+
+  // building_id is the optional building identifier to filter by.
+  // If empty, returns assets in the specified state across all buildings.
+  string building_id = 2;
+
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryAssetsByStateResponse is the response type for Query/AssetsByState RPC method.
+message QueryAssetsByStateResponse {
+  // assets is the list of assets in the specified state.
+  repeated Asset assets = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+
+  // pagination defines the pagination response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
